@@ -2,30 +2,22 @@ import cv2
 import numpy as np
 
 # Carga la imagen
-imagen = cv2.imread('img.jpg', cv2.IMREAD_GRAYSCALE)  # Carga la imagen en escala de grises
+imagen = cv2.imread(
+    "img0.jpg", cv2.IMREAD_GRAYSCALE
+)  # Carga la imagen en escala de grises
 
-# Divide la imagen en regiones/zonas (por ejemplo, en 4 partes)
-alto, ancho = imagen.shape
-num_filas = 2  # Número de filas de regiones
-num_columnas = 2  # Número de columnas de regiones
-alto_region = alto // num_filas
-ancho_region = ancho // num_columnas
+umbral_global = 150
 
-# Define los umbrales para cada región (en este ejemplo, son valores arbitrarios)
-umbrales = [150 , 150, 150, 150]  # Debes proporcionar los umbrales específicos para cada región
+# Convierte la imagen a escala de grises si es a color
+if len(imagen.shape) > 2:
+    imagen_gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+else:
+    imagen_gris = imagen
 
-# Inicializa una imagen de salida
-imagen_binarizada = np.zeros_like(imagen)
-
-# Aplica la binarización en cada región
-for fila in range(num_filas):
-    for columna in range(num_columnas):
-        region = imagen[fila * alto_region:(fila + 1) * alto_region, columna * ancho_region:(columna + 1) * ancho_region]
-        umbral = umbrales[fila * num_columnas + columna]
-        _, binarizada_region = cv2.threshold(region, umbral, 255, cv2.THRESH_BINARY)
-        imagen_binarizada[fila * alto_region:(fila + 1) * alto_region, columna * ancho_region:(columna + 1) * ancho_region] = binarizada_region
+# Aplica la binarización en toda la imagen
+_, imagen_binarizada = cv2.threshold(imagen_gris, umbral_global, 255, cv2.THRESH_BINARY)
 
 # Muestra la imagen binarizada
-cv2.imshow('Imagen Binarizada', imagen_binarizada)
+cv2.imshow("Imagen Binarizada", imagen_binarizada)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
