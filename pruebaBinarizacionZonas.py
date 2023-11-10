@@ -3,7 +3,7 @@ import numpy as np
 
 # Carga la imagen
 imagen = cv2.imread(
-    "img0.jpg", cv2.IMREAD_GRAYSCALE
+    "img2.jpg", cv2.IMREAD_GRAYSCALE
 )  # Carga la imagen en escala de grises
 
 umbral_global = 150

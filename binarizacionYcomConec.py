@@ -83,10 +83,89 @@ labels = np.uint8(labels)
 new_labels, _, new_stats, _ = cv2.connectedComponentsWithStats(labels)
 
 
-# Dibuja rectángulos alrededor de los componentes conectados en la imagen original
+# AQUI IRIA EL NUEVO FILTRO
+
+print(len(new_stats))
+
+
+def filtro_cambio_color_en_proporciones(imagen_binaria, proporciones):
+    total_transiciones = 0
+
+    for prop in proporciones:
+        # Extraer la fila específica
+        fila_a_analizar = imagen_binaria[int(imagen_binaria.shape[0] * prop), :]
+
+        # Calcular las diferencias en la fila
+        diferencias = np.abs(np.diff(fila_a_analizar))
+
+        # Sumar las diferencias en la fila
+        total_transiciones += np.sum(diferencias)
+
+    return total_transiciones
+
+
+proporciones_a_analizar = [1 / 4, 1 / 2, 3 / 4]
+
+# Rango de cantidad de diferencias permitidas
+rango_cantidad_diferencias = (5000, 10000)
+
+# Nuevos labels y stats que almacenarán solo los componentes que pasan el nuevo filtro
+nuevos_labels = np.zeros_like(labels)
+nuevos_stats = []
+indices_validos = []
+
+# Iterar sobre las estadísticas de los nuevos componentes
 for i in range(1, len(new_stats)):
     x, y, w, h, area = new_stats[i]
+
+    # Reiniciar el total de transiciones para cada objeto
+    total_transiciones = 0
+
+    # Extraer la región de interés (ROI) de la imagen binarizada
+    roi_a_analizar = imagen_binarizada[y : y + h, x : x + w]
+
+    # Aplicar el filtro en las proporciones específicas
+    total_transiciones = filtro_cambio_color_en_proporciones(
+        roi_a_analizar, proporciones_a_analizar
+    )
+    print(total_transiciones)
+
+    # Verificar si la suma total de transiciones está dentro del rango
+    if (
+        rango_cantidad_diferencias[0]
+        <= total_transiciones
+        <= rango_cantidad_diferencias[1]
+    ):
+        # Imprimir la cantidad total de transiciones para cada objeto
+        print(f"Objeto {i}: Total de transiciones = {total_transiciones}")
+
+        # Almacenar el índice válido
+        indices_validos.append(i)
+
+# Convertir la matriz nuevos_labels a un tipo de datos compatible
+nuevos_labels = np.uint8(nuevos_labels)
+
+# Remover el componente 0 (fondo) de los nuevos labels y stats
+nuevos_labels, _, nuevos_stats, _ = cv2.connectedComponentsWithStats(nuevos_labels)
+
+# Filtrar los índices válidos después de aplicar el filtro
+indices_validos_set = set(indices_validos)
+nuevos_stats = [stat for i, stat in enumerate(nuevos_stats) if i in indices_validos_set]
+
+
+# Después de la sección donde se aplica el filtro
+print("Número de objetos válidos:", len(nuevos_stats))
+
+
+for i in range(1, len(nuevos_stats)):
+    x, y, w, h, area = nuevos_stats[i]
     cv2.rectangle(imgColor, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+
+# Dibuja rectángulos alrededor de los componentes conectados en la imagen original
+# for i in range(1, len(new_stats)):
+#    x, y, w, h, area = new_stats[i]
+#    cv2.rectangle(imgColor, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
 
 cv2.namedWindow("Imagen Mostrada", cv2.WINDOW_NORMAL)
