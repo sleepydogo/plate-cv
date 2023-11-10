@@ -1,14 +1,13 @@
 import cv2
 import numpy as np
 
-img_leer = "img1.jpg"
+img_leer = "img0.jpg"
 # Carga la imagen
 imgColor = cv2.imread(img_leer)
 
 imagen = cv2.imread(
     img_leer, cv2.IMREAD_GRAYSCALE
 )  # Carga la imagen en escala de grises
-
 
 # Binarizacion
 
@@ -80,12 +79,11 @@ for label in range(1, len(stats)):
 labels = np.uint8(labels)
 
 # Remover los componentes eliminados de labels y stats
-new_labels, _, new_stats, _ = cv2.connectedComponentsWithStats(labels)
+_, new_labels, new_stats, _ = cv2.connectedComponentsWithStats(labels)
+
 
 
 # AQUI IRIA EL NUEVO FILTRO
-
-print(len(new_stats))
 
 
 def filtro_cambio_color_en_proporciones(imagen_binaria, proporciones):
@@ -107,7 +105,7 @@ def filtro_cambio_color_en_proporciones(imagen_binaria, proporciones):
 proporciones_a_analizar = [1 / 4, 1 / 2, 3 / 4]
 
 # Rango de cantidad de diferencias permitidas
-rango_cantidad_diferencias = (5000, 10000)
+rango_cantidad_diferencias = (30, 90)
 
 # Nuevos labels y stats que almacenarán solo los componentes que pasan el nuevo filtro
 nuevos_labels = np.zeros_like(labels)
@@ -128,29 +126,37 @@ for i in range(1, len(new_stats)):
     total_transiciones = filtro_cambio_color_en_proporciones(
         roi_a_analizar, proporciones_a_analizar
     )
+
     print(total_transiciones)
 
+    valor_final = total_transiciones/(w+1)
+
+    print(valor_final)
+
     # Verificar si la suma total de transiciones está dentro del rango
-    if (
+    if not (
         rango_cantidad_diferencias[0]
-        <= total_transiciones
+        <= valor_final
         <= rango_cantidad_diferencias[1]
     ):
         # Imprimir la cantidad total de transiciones para cada objeto
         print(f"Objeto {i}: Total de transiciones = {total_transiciones}")
 
-        # Almacenar el índice válido
-        indices_validos.append(i)
+        new_labels[
+            new_labels == i
+        ] = 0  # Eliminar componente basado en la relación de aspecto
+        new_stats[i] = 0  # Eliminar las estadísticas del componente
+
 
 # Convertir la matriz nuevos_labels a un tipo de datos compatible
-nuevos_labels = np.uint8(nuevos_labels)
+new_labels = np.uint8(new_labels)
 
 # Remover el componente 0 (fondo) de los nuevos labels y stats
-nuevos_labels, _, nuevos_stats, _ = cv2.connectedComponentsWithStats(nuevos_labels)
+nuevos_labels, _, nuevos_stats, _ = cv2.connectedComponentsWithStats(new_labels)
 
-# Filtrar los índices válidos después de aplicar el filtro
-indices_validos_set = set(indices_validos)
-nuevos_stats = [stat for i, stat in enumerate(nuevos_stats) if i in indices_validos_set]
+
+
+
 
 
 # Después de la sección donde se aplica el filtro
@@ -168,8 +174,13 @@ for i in range(1, len(nuevos_stats)):
 #    cv2.rectangle(imgColor, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
 
-cv2.namedWindow("Imagen Mostrada", cv2.WINDOW_NORMAL)
-cv2.imshow("Imagen Mostrada", imgColor)
-cv2.resizeWindow("Imagen Mostrada", 800, 600)
+
+cv2.imshow("Imagen Mostrada", cv2.WINDOW_NORMAL)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+resized = cv2.resize(imgColor, (700,700), interpolation = cv2.INTER_AREA)
+cv2.imshow("Imagen Mostrada", resized)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

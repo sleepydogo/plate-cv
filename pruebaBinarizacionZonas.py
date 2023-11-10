@@ -3,7 +3,7 @@ import numpy as np
 
 # Carga la imagen
 imagen = cv2.imread(
-    "img2.jpg", cv2.IMREAD_GRAYSCALE
+    "img0.jpg", cv2.IMREAD_GRAYSCALE
 )  # Carga la imagen en escala de grises
 
 umbral_global = 150
@@ -18,6 +18,7 @@ else:
 _, imagen_binarizada = cv2.threshold(imagen_gris, umbral_global, 255, cv2.THRESH_BINARY)
 
 # Muestra la imagen binarizada
-cv2.imshow("Imagen Binarizada", imagen_binarizada)
+resized = cv2.resize(imagen_binarizada, (700,700), interpolation = cv2.INTER_AREA)
+cv2.imshow("Imagen Binarizada", resized)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
