@@ -14,10 +14,10 @@ class static_variables:
 
 def recortar_imagen(img, selec):
     recorte = img[
-    selec[1] - 5 :
-    selec[1] + selec[3] + 5,
-    selec[0] - 5: 
-    selec[0] + selec[2] + 5
+    selec[1] - 2 :
+    selec[1] + selec[3] + 2,
+    selec[0] - 2: 
+    selec[0] + selec[2] + 2
     ].copy()
     cv2.imwrite(f'/home/tom/universidad/plate-cv/resources/templates/template{static_variables.contador}.jpg', recorte)
     static_variables.contador = static_variables.contador + 1
