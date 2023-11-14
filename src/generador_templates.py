@@ -40,15 +40,11 @@ def recortar_extremos_patente(patente_binarizada):
 
 def recortar_digitos(img):
     altura, ancho = img.shape[:2]
-
     _, labels, stats, centroids = cv2.connectedComponentsWithStats(~img)
     patente_copia = img.copy()
-
     stats_letras = []
-
     area_max = (altura*ancho)/6
     area_min = (ancho*altura)/62
-
     for i in range(0, len(stats)):
         x, y, w, h, area = stats[i]
         if area_max > area > area_min:
