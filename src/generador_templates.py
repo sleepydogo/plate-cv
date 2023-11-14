@@ -26,7 +26,7 @@ def recortar_imagen(img, selec):
 
 def recortar_extremos_patente(patente_binarizada):
     altura, ancho = patente_binarizada.shape[:2]
-    THRESHOLD = 132
+    THRESHOLD = 100
     filas_a_eliminar = []
     for i in range(altura):
         suma = 0
@@ -41,7 +41,6 @@ def recortar_extremos_patente(patente_binarizada):
 def recortar_digitos(img):
     altura, ancho = img.shape[:2]
     _, labels, stats, centroids = cv2.connectedComponentsWithStats(~img)
-    patente_copia = img.copy()
     stats_letras = []
     area_max = (altura*ancho)/6
     area_min = (ancho*altura)/62
@@ -56,7 +55,7 @@ def main():
     for i in os.listdir('/home/tom/universidad/plate-cv/resources/dataset_generado'):
         print(i)
         imagen = cv2.imread('/home/tom/universidad/plate-cv/resources/dataset_generado/'+i, cv2.IMREAD_GRAYSCALE)
-        _, patente_binarizada = cv2.threshold(imagen, 150, 255, cv2.THRESH_BINARY)
+        _, patente_binarizada = cv2.threshold(imagen, 140, 255, cv2.THRESH_BINARY)
         imagen = recortar_extremos_patente(patente_binarizada)
         imagen = recortar_digitos(imagen.copy())
     return 0 
